@@ -102,6 +102,8 @@ seed             constant float8 := 0.42;
 
 The `seed` value controls PostgreSQL's `setseed()` — keeping it the same guarantees identical data across runs. At least 1M orders is recommended for the demos to show meaningful differences in `EXPLAIN ANALYZE`.
 
+> **Note on `EXPLAIN ANALYZE` timings:** Execution times vary between runs depending on the buffer cache state (cold vs warm) and whether planner statistics are up to date. Focus on the plan structure (node types, join strategies), row estimates, and buffer counts rather than raw timings. Timings are useful for relative comparison (e.g. before and after adding an index) but not as absolute measures.
+
 5. Connect to the database:
 
 ```bash
