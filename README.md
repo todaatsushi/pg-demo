@@ -9,6 +9,57 @@ The aim is to demonstrate the following:
 - Locking
     - mainly in the context of database migrations
 
+## Data model
+
+```mermaid
+erDiagram
+    stores {
+        bigint id PK
+        text name
+        text location
+    }
+
+    staff {
+        bigint id PK
+        text name
+        bigint store_id FK
+    }
+
+    customers {
+        bigint id PK
+        text name
+        text email
+    }
+
+    products {
+        bigint id PK
+        text sku
+        text name
+        numeric price
+        text type
+        text[] tags
+        bigint store_id FK
+    }
+
+    orders {
+        bigint id PK
+        timestamp ordered_at
+        text status
+        int quantity
+        text product_type
+        text[] tags
+        bigint product_id FK
+        bigint customer_id FK
+        bigint staff_id FK
+    }
+
+    stores ||--o{ staff : "employs"
+    stores ||--o{ products : "sells"
+    products ||--o{ orders : "ordered as"
+    customers ||--o{ orders : "places"
+    staff ||--o{ orders : "processes"
+```
+
 ## Getting started
 
 ### Prerequisites
