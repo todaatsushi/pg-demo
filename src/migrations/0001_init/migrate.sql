@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS orders (
     status          text NOT NULL DEFAULT 'pending',
     quantity        int NOT NULL,
     product_type    text NOT NULL,
+    tags            text[],
     product_id      bigint NOT NULL REFERENCES products (id),
     customer_id     bigint NOT NULL REFERENCES customers (id),
     staff_id        bigint NOT NULL REFERENCES staff (id),

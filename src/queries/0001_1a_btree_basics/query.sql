@@ -17,6 +17,7 @@ SELECT * FROM orders WHERE customer_id = 42;
 CREATE INDEX IF NOT EXISTS idx_orders_btree_customer_id ON orders (customer_id);
 
 -- Step 3: Same query, now with the index
--- This should show an Index Scan — PG jumps straight to the matching rows.
+-- PG now uses the index (Index Scan or Bitmap Index Scan) instead of
+-- reading the entire table. Much faster.
 EXPLAIN ANALYZE
 SELECT * FROM orders WHERE customer_id = 42;

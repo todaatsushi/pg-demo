@@ -7,8 +7,7 @@
 -- Other examples of this pattern:
 -- - Adding a stored generated column
 -- - Changing a column type with USING expression
--- - Validating a new NOT NULL constraint on an existing nullable column
--- - Adding a foreign key constraint (validates every row)
+-- - Adding NOT NULL to an existing nullable column (scans every row to validate)
 
 -- === SESSION 1 ===
 -- This rewrites every row to convert timestamp → timestamptz.

@@ -1,6 +1,8 @@
 -- 0002_seed.sql
 -- Seed data for coffee store demo. Idempotent — safe to re-run.
--- Uses setseed() for deterministic random output.
+-- Uses setseed() for approximate determinism — tag assignment may vary
+-- across PG versions due to sort algorithm differences, but order
+-- volumes and distributions will be consistent.
 
 BEGIN;
 
@@ -32,24 +34,26 @@ WHERE NOT EXISTS (SELECT 1 FROM staff LIMIT 1);
 -- ============================================================
 -- Products (12 per store = 60)
 -- ============================================================
-SELECT setseed(0.42);
-
 INSERT INTO products (sku, name, price, type, tags, store_id)
 SELECT
     'SKU-' || s.id || '-' || p.idx,
     p.product_name,
     p.price,
     p.product_type,
-    (SELECT array_agg(t)
-     FROM (
-         SELECT unnest(ARRAY['vegan','takeaway only','in store only','offer','organic','fair trade']) AS t
-         ORDER BY random()
-         LIMIT 1 + floor(random() * 3)::int
-     ) sub),
+    -- Deterministic tag assignment using md5 of store_id + product_idx.
+    -- Each product gets 1-3 tags. We use bit positions in the md5 hash
+    -- to decide which tags to include.
+    COALESCE(
+        (SELECT array_agg(tag) FROM (
+            SELECT tag, rn FROM unnest(ARRAY['vegan','takeaway only','in store only','offer','organic','fair trade']) WITH ORDINALITY AS t(tag, rn)
+            WHERE get_byte(decode(md5(s.id::text || '-' || p.idx::text), 'hex'), 0) & (1 << ((rn::int - 1) % 8)) != 0
+        ) sub),
+        ARRAY['vegan']  -- fallback if bitmask selects no tags
+    ),
     s.id
 FROM stores s
 CROSS JOIN (VALUES
-    (1,  'English Breakfast',  3.50, 'tea (non caffeinated)'),
+    (1,  'English Breakfast',  3.50, 'tea (caffeine)'),
     (2,  'Chamomile Blend',    3.50, 'tea (non caffeinated)'),
     (3,  'Green Tea',          3.75, 'tea (caffeine)'),
     (4,  'Matcha Tea',         4.25, 'tea (caffeine)'),
@@ -124,6 +128,8 @@ BEGIN
     INSERT INTO tmp_order_rows (customer_id)
     SELECT c.id
     FROM tmp_cust_orders co
+    -- NOTE: assumes identity IDs start at 1 with no gaps on a fresh database.
+    -- This holds when the seed runs in a single transaction on an empty table.
     JOIN customers c ON c.id = co.customer_seq
     CROSS JOIN LATERAL generate_series(1, co.num_orders);
 
@@ -137,11 +143,12 @@ BEGIN
     CREATE TEMP TABLE tmp_product_lookup (
         idx int,
         product_id bigint,
-        product_type text
+        product_type text,
+        product_tags text[]
     ) ON COMMIT DROP;
 
     INSERT INTO tmp_product_lookup
-    SELECT row_number() OVER (ORDER BY id)::int, id, type FROM products;
+    SELECT row_number() OVER (ORDER BY id)::int, id, type, tags FROM products;
 
     CREATE TEMP TABLE tmp_staff_lookup (
         idx int,
@@ -152,7 +159,7 @@ BEGIN
     SELECT row_number() OVER (ORDER BY id)::int, id FROM staff;
 
     -- Generate random values in bulk, then join to lookups
-    INSERT INTO orders (ordered_at, status, quantity, product_type, product_id, customer_id, staff_id)
+    INSERT INTO orders (ordered_at, status, quantity, product_type, tags, product_id, customer_id, staff_id)
     SELECT
         '2026-01-01'::timestamp + (r.rand_ts * interval '30 days 23 hours 59 minutes'),
         CASE
@@ -163,6 +170,7 @@ BEGIN
         END,
         1 + floor(r.rand_qty * 5)::int,
         pl.product_type,
+        pl.product_tags,
         pl.product_id,
         r.customer_id,
         sl.staff_id

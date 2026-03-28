@@ -1,8 +1,8 @@
 -- 1c. Composite Indexes
 --
 -- A composite (multi-column) index covers queries that filter on multiple columns.
--- Column order in the index matters — PG can only use the index if the query
--- filters on a leading prefix of the indexed columns.
+-- Column order in the index matters — PG uses composite indexes most efficiently
+-- when the query filters on a leading prefix of the indexed columns.
 
 -- Step 1: A natural query — "all completed orders for customer 42"
 -- This filters on two columns: customer_id AND status.
@@ -36,7 +36,8 @@ WHERE customer_id = 42
 
 -- Step 4: Column order matters
 -- Query filtering on status alone — the leading column is customer_id,
--- so PG cannot use this index.
+-- so PG won't use this index efficiently. Combined with status = 'completed'
+-- matching ~70% of rows, a Seq Scan is the clear winner here.
 EXPLAIN ANALYZE
 SELECT * FROM orders
 WHERE status = 'completed';

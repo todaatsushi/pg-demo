@@ -11,23 +11,23 @@
 SHOW work_mem;
 
 -- Step 1: Hash join under normal conditions
--- Join 1M orders to 60 products with no index on orders.product_id.
--- PG hashes the small products table and probes it for each order.
+-- Join 1M orders to ~100k customers with no index on orders.customer_id.
+-- PG hashes the smaller customers table and probes it for each order.
 EXPLAIN ANALYZE
-SELECT o.id, o.ordered_at, p.name, p.type
+SELECT o.id, o.ordered_at, c.name
 FROM orders o
-JOIN products p ON p.id = o.product_id;
+JOIN customers c ON c.id = o.customer_id;
 
 -- Step 2: Reduce work_mem to force the hash table to spill to disk
--- Even though the products table is small, at 1kB PG can't fit the hash
--- table in memory — it splits into multiple batches and writes temp files.
+-- ~100k customers won't fit in a 64kB hash table. PG splits it into
+-- multiple batches and writes temp files.
 -- Look for "Batches: N" (where N > 1) in the output.
-SET work_mem = '1kB';
+SET work_mem = '64kB';
 
 EXPLAIN ANALYZE
-SELECT o.id, o.ordered_at, p.name, p.type
+SELECT o.id, o.ordered_at, c.name
 FROM orders o
-JOIN products p ON p.id = o.product_id;
+JOIN customers c ON c.id = o.customer_id;
 
 -- Step 3: Reset work_mem
 RESET work_mem;

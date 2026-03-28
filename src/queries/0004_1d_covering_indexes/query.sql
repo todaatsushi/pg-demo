@@ -7,6 +7,11 @@
 -- If every column in the SELECT, WHERE, and ORDER BY is in the index, PG can
 -- answer the query entirely from the index — an Index Only Scan.
 
+-- Ensure the visibility map is up to date — Index Only Scans need this
+-- to know which heap pages are all-visible (no recent changes).
+-- Without VACUUM after a bulk load, PG may still visit the heap.
+VACUUM orders;
+
 -- Prerequisite: composite index on (customer_id, status)
 CREATE INDEX IF NOT EXISTS idx_orders_covering_customer_status ON orders (customer_id, status);
 
@@ -40,5 +45,6 @@ SELECT customer_id, status, ordered_at FROM orders
 WHERE customer_id = 42
   AND status = 'completed';
 
--- Note: INCLUDE columns cannot be used in WHERE or ORDER BY — they're not
--- in the B-tree. They're only there so PG can read them without the heap.
+-- Note: INCLUDE columns are not part of the B-tree search key, so the index
+-- cannot accelerate filtering or sorting on them. They can appear in SQL
+-- WHERE/ORDER BY clauses, but PG won't use the index for those conditions.

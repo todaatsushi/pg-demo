@@ -7,10 +7,11 @@
 -- Trade-off: the merge itself is fast, but sorting is expensive if there's no index.
 -- PG often prefers hash join unless the data is already in order.
 
--- We disable hash join so PG is forced to consider merge join.
+-- We disable hash join and nested loop so PG is forced to use merge join.
 -- We're being explicit about this — in practice PG picks merge join on its own
--- when the conditions are right.
+-- when the conditions are right (both sides pre-sorted via indexes).
 SET enable_hashjoin = off;
+SET enable_nestloop = off;
 
 -- Step 1: Merge join without indexes on the join key
 -- PG has to sort both sides before it can merge. Look for Sort nodes in the plan.
@@ -21,8 +22,8 @@ FROM orders o
 JOIN customers c ON c.id = o.customer_id;
 
 -- Step 2: Add an index on orders.customer_id
--- customers.id already has a PK index. Now both sides can be read in order
--- without an explicit sort — the merge join reads directly from the indexes.
+-- customers.id already has a PK index. PG now has the option to read both
+-- sides in order from the indexes, potentially eliminating the Sort steps.
 CREATE INDEX IF NOT EXISTS idx_orders_merge_join_customer_id ON orders (customer_id);
 
 EXPLAIN (ANALYZE, BUFFERS)
@@ -34,6 +35,7 @@ JOIN customers c ON c.id = o.customer_id;
 -- PG may still prefer hash join even with indexes on both sides —
 -- which illustrates that merge join has a narrow sweet spot.
 RESET enable_hashjoin;
+RESET enable_nestloop;
 
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT o.id, o.ordered_at, c.name

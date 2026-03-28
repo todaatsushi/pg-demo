@@ -1,39 +1,35 @@
 -- 2a. Nested Loop Join
 --
--- How it works: for each row in the outer table, scan the inner table for matches.
--- Like a for loop inside a for loop.
+-- How it works: for each row in the outer table, look up matching rows in
+-- the inner table. Like a for loop inside a for loop.
 --
--- When PG uses it: small outer result set, especially when the inner side has an index.
--- Trade-off: fine for small lookups, terrible at scale without an index on the inner side.
+-- When PG uses it: small outer result set, especially when the inner side
+-- has an index for fast lookups.
+--
+-- Trade-off: efficient when the outer set is small and the inner lookup is
+-- cheap (indexed). When the outer set grows, the repeated lookups add up.
 
--- Context: pick a real customer and see how many orders they have
-SELECT c.id, c.name, count(o.id) AS order_count
-FROM customers c
-JOIN orders o ON o.customer_id = c.id
-WHERE c.id = 42
-GROUP BY c.id, c.name;
-
--- Step 1: Nested loop without an index on the inner side
--- PG finds the one matching customer, then for that customer it has to
--- scan the entire orders table to find their orders. The inner side
--- has no fast path — every loop iteration is a full scan.
+-- Step 1: Nested loop with a small outer set
+-- Outer: 100 orders (via PK index on orders.id)
+-- Inner: for each order, look up the customer by PK — fast index lookup.
+-- PG naturally picks nested loop here because the outer set is tiny.
 EXPLAIN ANALYZE
 SELECT o.id, o.ordered_at, o.status, c.name
-FROM customers c
-JOIN orders o ON o.customer_id = c.id
-WHERE c.id = 42;
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.id < 100;
 
--- Step 2: Add an index on orders.customer_id
-CREATE INDEX IF NOT EXISTS idx_orders_nested_loop_customer_id ON orders (customer_id);
-
--- Same query — PG still uses a nested loop, but now each iteration
--- does an index lookup instead of a full scan. Fast.
+-- Step 2: Scale up the outer set
+-- Same join, but now the outer set is 10,000 rows.
+-- At this scale, PG may switch to a hash join — it's cheaper than
+-- 10,000 individual index lookups. Check what the planner chose.
 EXPLAIN ANALYZE
 SELECT o.id, o.ordered_at, o.status, c.name
-FROM customers c
-JOIN orders o ON o.customer_id = c.id
-WHERE c.id = 42;
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.id < 10000;
 
--- The nested loop itself isn't the problem — it's what happens on
--- the inner side that matters. Without an index, each iteration is
--- expensive. With an index, each iteration is a quick lookup.
+-- Nested loop is great when the outer set is small and the inner side is
+-- indexed. As the outer set grows, PG switches to hash join or merge join
+-- because the cost of repeated lookups exceeds the cost of building a
+-- hash table or sorting.

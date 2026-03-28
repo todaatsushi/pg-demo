@@ -1,12 +1,9 @@
 -- Reverse 0002_seed.sql
--- Deletes all seed data in dependency order, preserving schema.
+-- Truncates all seed data, preserving schema.
+-- Uses TRUNCATE instead of DELETE for speed on large tables.
 
 BEGIN;
 
-DELETE FROM orders;
-DELETE FROM customers;
-DELETE FROM products;
-DELETE FROM staff;
-DELETE FROM stores;
+TRUNCATE orders, customers, products, staff, stores CASCADE;
 
 COMMIT;
