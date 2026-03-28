@@ -77,7 +77,7 @@ WHERE NOT EXISTS (SELECT 1 FROM products LIMIT 1);
 -- ============================================================
 DO $$
 DECLARE
-    target_orders    constant int    := 2500000;
+    target_orders    constant int    := 10000000;
     target_customers constant int    := 95000;
     seed             constant float8 := 0.42;
     raw_total        bigint;

@@ -1,4 +1,4 @@
--- 1c. Composite Indexes
+-- 1b. Composite Indexes
 --
 -- A composite (multi-column) index covers queries that filter on multiple columns.
 -- Column order in the index matters — PG uses composite indexes most efficiently
