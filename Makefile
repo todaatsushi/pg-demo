@@ -10,6 +10,9 @@ wipe:
 shell:
 	docker compose exec pg-demo /bin/bash
 
+sql:
+	docker compose exec pg-demo psql
+
 logs:
 	docker compose logs pg-demo
 
