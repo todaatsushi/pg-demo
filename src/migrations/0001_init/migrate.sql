@@ -3,6 +3,8 @@
 
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS pg_buffercache;
+
 CREATE TABLE IF NOT EXISTS stores (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name        text NOT NULL,

@@ -12,3 +12,6 @@ shell:
 
 logs:
 	docker compose logs pg-demo
+
+clear-cache:
+	docker compose exec pg-demo psql -c "select pg_buffercache_evict_all();"
