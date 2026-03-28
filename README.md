@@ -86,11 +86,21 @@ docker compose exec pg-demo bash
 psql -f /app/src/migrations/0001_init/migrate.sql
 ```
 
-4. Seed the data (~30-60s):
+4. Seed the data (may take a few minutes depending on volume):
 
 ```bash
 psql -f /app/src/migrations/0002_seed/migrate.sql
 ```
+
+The seed script creates 5M orders across 95k customers by default. You can tweak these figures by editing the constants at the top of `src/migrations/0002_seed/migrate.sql`:
+
+```sql
+target_orders    constant int    := 5000000;
+target_customers constant int    := 95000;
+seed             constant float8 := 0.42;
+```
+
+The `seed` value controls PostgreSQL's `setseed()` — keeping it the same guarantees identical data across runs. At least 1M orders is recommended for the demos to show meaningful differences in `EXPLAIN ANALYZE`.
 
 5. Connect to the database:
 

@@ -10,7 +10,7 @@
 -- Wrapped in BEGIN/COMMIT as most migration tools do automatically.
 
 -- === SESSION 1 ===
--- This takes a SHARE lock while building the index. Slow on 1M rows.
+-- This takes a SHARE lock while building the index. Slow on 5M rows.
 BEGIN;
 CREATE INDEX idx_orders_lock_demo ON orders (ordered_at);
 COMMIT;

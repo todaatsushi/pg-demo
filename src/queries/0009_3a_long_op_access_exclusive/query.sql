@@ -11,7 +11,7 @@
 
 -- === SESSION 1 ===
 -- This rewrites every row to convert timestamp → timestamptz.
--- On 1M rows this takes a noticeable amount of time.
+-- On 5M rows this takes a noticeable amount of time.
 -- Leave it running and switch to session 2.
 BEGIN;
 ALTER TABLE orders ALTER COLUMN ordered_at TYPE timestamptz;

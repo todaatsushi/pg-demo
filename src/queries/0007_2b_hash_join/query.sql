@@ -11,7 +11,7 @@
 SHOW work_mem;
 
 -- Step 1: Hash join under normal conditions
--- Join 1M orders to ~100k customers with no index on orders.customer_id.
+-- Join 5M orders to ~100k customers with no index on orders.customer_id.
 -- PG hashes the smaller customers table and probes it for each order.
 EXPLAIN ANALYZE
 SELECT o.id, o.ordered_at, c.name

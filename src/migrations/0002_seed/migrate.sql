@@ -71,17 +71,19 @@ WHERE NOT EXISTS (SELECT 1 FROM products LIMIT 1);
 -- ============================================================
 -- Customers + Orders
 -- Uses a PL/pgSQL block to:
---   1. Generate customers with 1-20 orders each until 1M is reached
---   2. Expand into 1M order rows
+--   1. Create target_customers customers with random order counts (1-100 weight range)
+--   2. Scale weights so total hits target_orders exactly
+--   3. Expand into individual order rows
 -- ============================================================
 DO $$
 DECLARE
-    target_orders  constant int := 1000000;
-    total_assigned int := 0;
-    cust_id        int := 0;
-    order_count    int;
-    product_count  int;
-    staff_count    int;
+    target_orders    constant int    := 2500000;
+    target_customers constant int    := 95000;
+    seed             constant float8 := 0.42;
+    raw_total        bigint;
+    shortfall        int;
+    product_count    int;
+    staff_count      int;
 BEGIN
     IF EXISTS (SELECT 1 FROM orders LIMIT 1) THEN
         RAISE NOTICE 'Orders already seeded, skipping.';
@@ -92,25 +94,65 @@ BEGIN
     SELECT count(*) INTO staff_count FROM staff;
 
     -- deterministic seed
-    PERFORM setseed(0.42);
+    PERFORM setseed(seed);
 
-    -- Step 1: build temp table mapping customer_seq -> num_orders
+    -- Step 1: distribute orders across a fixed number of customers.
+    -- Each customer gets a random weight (1-100), then we scale all weights
+    -- so the total hits target_orders exactly. This gives a realistic spread
+    -- where some customers order much more than others.
     CREATE TEMP TABLE tmp_cust_orders (
         customer_seq int NOT NULL,
         num_orders   int NOT NULL
     ) ON COMMIT DROP;
 
-    WHILE total_assigned < target_orders LOOP
-        cust_id := cust_id + 1;
-        order_count := 1 + floor(random() * 20)::int;
-        IF total_assigned + order_count > target_orders THEN
-            order_count := target_orders - total_assigned;
-        END IF;
-        INSERT INTO tmp_cust_orders VALUES (cust_id, order_count);
-        total_assigned := total_assigned + order_count;
-    END LOOP;
+    -- Pass 1: assign random weights and scale to approximate target
+    CREATE TEMP TABLE tmp_cust_weights (
+        customer_seq int NOT NULL,
+        weight       int NOT NULL
+    ) ON COMMIT DROP;
 
-    RAISE NOTICE 'Generated % customers accounting for % orders', cust_id, total_assigned;
+    INSERT INTO tmp_cust_weights (customer_seq, weight)
+    SELECT seq, 1 + floor(random() * 100)::int
+    FROM generate_series(1, target_customers) AS seq;
+
+    INSERT INTO tmp_cust_orders (customer_seq, num_orders)
+    SELECT
+        customer_seq,
+        greatest(1, round(
+            weight::numeric / (SELECT sum(weight)::numeric FROM tmp_cust_weights)
+            * target_orders
+        )::int)
+    FROM tmp_cust_weights;
+
+    -- Pass 2: fix rounding drift so the total is exactly target_orders.
+    -- Spread the difference across random customers, 1 order at a time.
+    SELECT (target_orders - sum(num_orders)::int) INTO shortfall FROM tmp_cust_orders;
+
+    IF shortfall > 0 THEN
+        -- Add +1 to `shortfall` random customers
+        UPDATE tmp_cust_orders
+        SET num_orders = num_orders + 1
+        WHERE customer_seq IN (
+            SELECT customer_seq FROM tmp_cust_orders
+            ORDER BY random() LIMIT shortfall
+        );
+    ELSIF shortfall < 0 THEN
+        -- Remove -1 from `abs(shortfall)` customers (only those with > 1)
+        UPDATE tmp_cust_orders
+        SET num_orders = num_orders - 1
+        WHERE customer_seq IN (
+            SELECT customer_seq FROM tmp_cust_orders
+            WHERE num_orders > 1
+            ORDER BY random() LIMIT abs(shortfall)
+        );
+    END IF;
+
+    RAISE NOTICE 'Generated % customers accounting for % orders (min %, max %, avg %)',
+        target_customers,
+        (SELECT sum(num_orders) FROM tmp_cust_orders),
+        (SELECT min(num_orders) FROM tmp_cust_orders),
+        (SELECT max(num_orders) FROM tmp_cust_orders),
+        (SELECT round(avg(num_orders)) FROM tmp_cust_orders);
 
     -- Step 2: insert customers
     INSERT INTO customers (name, email)
@@ -137,7 +179,7 @@ BEGIN
 
     -- Step 4: insert orders using the row number for deterministic randomness
     -- We precompute random values in a CTE to avoid correlated subqueries per row.
-    PERFORM setseed(0.42);
+    PERFORM setseed(seed);
 
     -- Materialise product and staff ID arrays for O(1) lookup
     CREATE TEMP TABLE tmp_product_lookup (
@@ -187,7 +229,7 @@ BEGIN
     JOIN tmp_product_lookup pl ON pl.idx = r.prod_idx
     JOIN tmp_staff_lookup sl ON sl.idx = r.staff_idx;
 
-    RAISE NOTICE 'Inserted 1M orders.';
+    RAISE NOTICE 'Inserted % orders across % customers.', target_orders, target_customers;
 END $$;
 
 COMMIT;
