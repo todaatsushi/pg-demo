@@ -26,30 +26,22 @@ docker compose up -d
 2. Shell into the container:
 
 ```bash
-docker compose exec db bash
+docker compose exec pg-demo bash
 ```
 
-3. Authenticate Claude Code via device auth:
+3. Run the schema migration:
 
 ```bash
-claude
+psql -f /app/src/migrations/0001_init/migrate.sql
 ```
 
-This will provide a URL to authenticate in your browser.
-
-4. Run the schema migration:
+4. Seed the data (~30-60s):
 
 ```bash
-psql -f /app/src/migrations/0001_init.sql
+psql -f /app/src/migrations/0002_seed/migrate.sql
 ```
 
-5. Seed the data (~30-60s):
-
-```bash
-psql -f /app/src/migrations/0002_seed.sql
-```
-
-6. Connect to the database:
+5. Connect to the database:
 
 ```bash
 psql -U postgres -d coffee_store
