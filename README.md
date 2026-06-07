@@ -8,6 +8,9 @@ The aim is to demonstrate the following:
     - Different types of joins
 - Locking
     - mainly in the context of database migrations
+- Database entity configuration
+    - schemas
+    - roles
 
 ## Data model
 
