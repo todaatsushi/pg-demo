@@ -7,11 +7,14 @@ down:
 wipe:
 	docker compose down -v
 
-shell:
+dev:
 	docker compose exec pg-demo /bin/bash
 
+shell:
+	docker compose exec	-e PGPASSWORD=postgres pg-demo /bin/bash
+
 sql:
-	docker compose exec pg-demo psql
+	docker compose exec -e PGPASSWORD=postgres pg-demo psql -U postgres -d coffee_store
 
 logs:
 	docker compose logs pg-demo
