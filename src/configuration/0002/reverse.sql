@@ -1,5 +1,0 @@
-BEGIN;
-
-DROP ROLE IF EXISTS sourcing_user;
-
-COMMIT;
