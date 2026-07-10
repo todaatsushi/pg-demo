@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Stores{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Stores</h1>
+
+<div class="card mb-4">
+  <div class="card-header">Add a store</div>
+  <div class="card-body">
+    <form method="post" action="/stores">
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" class="form-control" id="location" name="location">
+      </div>
+      <button type="submit" class="btn btn-primary">Add store</button>
+    </form>
+  </div>
+</div>
+
+<h2 class="mb-3">All stores</h2>
+{% if stores %}
+<table class="table table-bordered table-striped">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for store in stores %}
+    <tr>
+      <td>{{ store.id }}</td>
+      <td>{{ store.name }}</td>
+      <td>{{ store.location or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No stores yet.</p>
+{% endif %}
+{% endblock %}

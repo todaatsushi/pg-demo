@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Orders</h1>
+
+<div class="card mb-4">
+  <div class="card-header">Add an order</div>
+  <div class="card-body">
+    <form method="post" action="/orders">
+      <div class="mb-3">
+        <label for="product" class="form-label">Product</label>
+        <input type="text" class="form-control" id="product" name="product" required>
+      </div>
+      <div class="mb-3">
+        <label for="units" class="form-label">Units</label>
+        <input type="number" class="form-control" id="units" name="units" min="1" required>
+      </div>
+      <div class="mb-3">
+        <label for="store_id" class="form-label">Store</label>
+        <select class="form-select" id="store_id" name="store_id" required>
+          <option value="" disabled selected>Select a store</option>
+          {% for store in stores %}
+          <option value="{{ store.id }}">{{ store.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="staff_id" class="form-label">Staff member</label>
+        <select class="form-select" id="staff_id" name="staff_id" required>
+          <option value="" disabled selected>Select a staff member</option>
+          {% for member in staff %}
+          <option value="{{ member.id }}">{{ member.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Add order</button>
+    </form>
+  </div>
+</div>
+
+<h2 class="mb-3">All orders</h2>
+{% if orders %}
+<table class="table table-bordered table-striped">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Product</th>
+      <th>Units</th>
+      <th>Store</th>
+      <th>Staff</th>
+      <th>Ordered at</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.id }}</td>
+      <td>{{ order.product }}</td>
+      <td>{{ order.units }}</td>
+      <td>{{ order.store_name }}</td>
+      <td>{{ order.staff_name }}</td>
+      <td>{{ order.ordered_at }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No orders yet.</p>
+{% endif %}
+{% endblock %}

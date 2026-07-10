@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Staff{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Staff</h1>
+
+<div class="card mb-4">
+  <div class="card-header">Add a staff member</div>
+  <div class="card-body">
+    <form method="post" action="/staff">
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="store_id" class="form-label">Store</label>
+        <select class="form-select" id="store_id" name="store_id" required>
+          <option value="" disabled selected>Select a store</option>
+          {% for store in stores %}
+          <option value="{{ store.id }}">{{ store.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Add staff member</button>
+    </form>
+  </div>
+</div>
+
+<h2 class="mb-3">All staff</h2>
+{% if staff %}
+<table class="table table-bordered table-striped">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Store</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for member in staff %}
+    <tr>
+      <td>{{ member.id }}</td>
+      <td>{{ member.name }}</td>
+      <td>{{ member.store_name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No staff yet.</p>
+{% endif %}
+{% endblock %}

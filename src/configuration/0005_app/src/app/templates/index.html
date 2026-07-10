@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Grocery Store Demo{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Grocery Store Demo</h1>
+<p>
+  This app demonstrates a FastAPI application backed by a PostgreSQL database.
+  It connects as the <code>application</code> role (created in
+  <code>0004_users/run.sql</code>) which:
+</p>
+<ul>
+  <li><strong>owns</strong> the <code>application</code> schema — full DDL (CREATE, ALTER, DROP) and DML on all its tables</li>
+  <li><strong>cannot access</strong> the <code>reporting</code> schema</li>
+</ul>
+
+<h2 class="mt-4">Template routes</h2>
+<div class="list-group mb-4">
+  <a href="/stores" class="list-group-item list-group-item-action">Stores — view and add stores</a>
+  <a href="/staff" class="list-group-item list-group-item-action">Staff — view and add staff members</a>
+</div>
+
+<h2 class="mt-4">Reporting scripts</h2>
+<p>Reporting views are queried via standalone Python scripts that connect as the <code>reporting</code> user:</p>
+<ul>
+  <li><code>uv run python scripts/staff_count_by_store.py</code></li>
+  <li><code>uv run python scripts/orders_by_day.py</code></li>
+  <li><code>uv run python scripts/orders_by_store.py</code></li>
+  <li><code>uv run python scripts/orders_by_staff.py</code></li>
+</ul>
+{% endblock %}
