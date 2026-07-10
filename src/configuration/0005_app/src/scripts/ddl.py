@@ -8,7 +8,7 @@ any other user (e.g. `developer_ro`) will fail with:
 
 Run forward migration:
     uv run python scripts/ddl.py
-    uv run python scripts/ddl.py --user application --password CRUD
+    uv run python scripts/ddl.py --user application --password pg
 
 Run reverse (drop reviews table):
     uv run python scripts/ddl.py --reverse
@@ -23,7 +23,7 @@ import psycopg
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--user", default="application")
-parser.add_argument("--password", default="CRUD")
+parser.add_argument("--password", default="pg")
 parser.add_argument("--reverse", action="store_true")
 args = parser.parse_args()
 

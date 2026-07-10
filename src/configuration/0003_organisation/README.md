@@ -10,15 +10,13 @@ Advantages of using schemas:
 
 ## The search path
 
-It's quite common to refer to tables without the schema name in it (the default is `"$user", public`, so before tweaking any schemas, table `stores` would actually be found at `public.stores`).
-
-So to find the table, you can set where the system will look to find the *unqualified* path. The `search_path` allows one to add schemas into one's "vision" and make sure the system knows to look for it when omitting the schema name.
+It's quite common to refer to tables without the schema name in it. So to find the table, you can set where the system will look to find the *unqualified* path. The `search_path` allows one to add schemas into one's "vision" and make sure the system knows to look for it when omitting the schema name. (the default is `"$user", public`, so before tweaking any schemas, table `stores` would actually be found at `public.stores`).
 
 The `$user` is a variable that matches the user name being connected as in case the schema and user are named the same. It's skipped if it doesn't exist.
 
 ## Granting on schemas
 
-Schema privileges and object privileges are two separate layers — both are required to access an object.
+Schema privileges and object privileges are two separate layers & both are required to access an object.
 
 Schema-level privileges:
 - `USAGE ON SCHEMA <name>` — required to reference objects in the schema at all. Without it a role cannot even mention `schema.table`.
@@ -31,7 +29,7 @@ GRANT USAGE ON SCHEMA application TO some_role;
 GRANT SELECT ON application.stores TO some_role;
 ```
 
-`USAGE` on a schema does **not** cascade down to grant `SELECT` on its tables — there is no schema-level equivalent of `SELECT` that bubbles down to all objects. The closest bulk mechanism is:
+`USAGE` on a schema does **not** cascade down to grant `SELECT` on its tables & there is no schema-level equivalent of `SELECT` that bubbles down to all objects. The closest bulk mechanism is:
 
 ```sql
 GRANT SELECT ON ALL TABLES IN SCHEMA application TO some_role;

@@ -7,7 +7,8 @@ role granting access to pg_stat_activity.
 
 Run:
     uv run python scripts/long_running_transactions.py
-    uv run python scripts/long_running_transactions.py --user performance_monitoring --password pg
+    uv run python scripts/long_running_transactions.py \\
+        --user performance_monitoring --password pg
     uv run python scripts/long_running_transactions.py --min-seconds 10
 """
 
@@ -24,7 +25,8 @@ args = parser.parse_args()
 
 DSN = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
-with psycopg.connect(DSN, row_factory=dict_row) as conn:
+conn = psycopg.connect(DSN, row_factory=dict_row)
+with conn:
     rows = conn.execute(
         """
         SELECT

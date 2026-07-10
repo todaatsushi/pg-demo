@@ -31,7 +31,7 @@ def dsn(user: str, password: str) -> str:
 
 
 print("Step 1/3: Creating application.orders as application...")
-with psycopg.connect(dsn("application", "CRUD"), autocommit=True) as conn:
+with psycopg.connect(dsn("application", "pg"), autocommit=True) as conn:
     conn.execute("""
         CREATE TABLE application.orders (
             id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

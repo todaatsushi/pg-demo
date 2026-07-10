@@ -106,7 +106,7 @@ def main() -> None:
     parser.add_argument("--duration", type=float, default=30.0)
     parser.add_argument("--workers", type=int, default=10)
     parser.add_argument("--user", default="application")
-    parser.add_argument("--password", default="CRUD")
+    parser.add_argument("--password", default="pg")
     parser.add_argument("--progress-every", type=int, default=100)
     parser.add_argument(
         "--true-dt",

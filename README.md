@@ -1,126 +1,33 @@
-This repository demonstrates some of the concepts behind working with postgresql in production.
+# pg-demo
 
-It contains a Docker environment with seed data and scripts that emulates a simple store that sells coffee online.
+A PostgreSQL demo environment running in Docker.
 
-The aim is to demonstrate the following:
-- Optimising queries
-    - Indexes
-    - Different types of joins
-- Locking
-    - mainly in the context of database migrations
-- Database entity configuration
-    - schemas
-    - roles
+## `src/queries`
 
-## Data model
+Query performance and locking using a high-volume coffee store dataset (up to 5M orders).
 
-```mermaid
-erDiagram
-    stores {
-        bigint id PK
-        text name
-        text location
-    }
+- **Indexes** — B-tree, composite, partial, covering, GIN
+- **Joins** — nested loop, hash join, merge join
+- **Locking** — long-running ops, lock queuing, timeouts
 
-    staff {
-        bigint id PK
-        text name
-        bigint store_id FK
-    }
+See [`src/queries/README.md`](src/queries/README.md).
 
-    customers {
-        bigint id PK
-        text name
-        text email
-    }
+## `src/configuration`
 
-    products {
-        bigint id PK
-        text sku
-        text name
-        numeric price
-        text type
-        text[] tags
-        bigint store_id FK
-    }
+Configuring a PostgreSQL database from scratch.
 
-    orders {
-        bigint id PK
-        timestamp ordered_at
-        text status
-        int quantity
-        text product_type
-        text[] tags
-        bigint product_id FK
-        bigint customer_id FK
-        bigint staff_id FK
-    }
+- **Databases, tables, views** — modelling data, regular vs materialised views
+- **Schemas** — organising objects, search path, grants
+- **Roles and users** — RBAC, ownership, privilege separation, default privileges
+- **App** — FastAPI app and Python scripts exercising the permission boundaries
 
-    stores ||--o{ staff : "employs"
-    stores ||--o{ products : "sells"
-    products ||--o{ orders : "ordered as"
-    customers ||--o{ orders : "places"
-    staff ||--o{ orders : "processes"
-```
+See [`src/configuration/README.md`](src/configuration/README.md).
 
-## Getting started
-
-### Prerequisites
-
-- Docker and Docker Compose
-
-### Run
-
-1. Build and start the container:
+## Usage
 
 ```bash
-docker compose up -d
-```
-
-2. Shell into the container:
-
-```bash
-docker compose exec pg-demo bash
-```
-
-3. Run the schema migration:
-
-```bash
-psql -f /app/src/migrations/0001_init/migrate.sql
-```
-
-4. Seed the data (may take a few minutes depending on volume):
-
-```bash
-psql -f /app/src/migrations/0002_seed/migrate.sql
-```
-
-The seed script creates 5M orders across 95k customers by default. You can tweak these figures by editing the constants at the top of `src/migrations/0002_seed/migrate.sql`:
-
-```sql
-target_orders    constant int    := 5000000;
-target_customers constant int    := 95000;
-seed             constant float8 := 0.42;
-```
-
-The `seed` value controls PostgreSQL's `setseed()` — keeping it the same guarantees identical data across runs. At least 1M orders is recommended for the demos to show meaningful differences in `EXPLAIN ANALYZE`.
-
-> **Note on `EXPLAIN ANALYZE` timings:** Execution times vary between runs depending on the buffer cache state (cold vs warm) and whether planner statistics are up to date. Focus on the plan structure (node types, join strategies), row estimates, and buffer counts rather than raw timings. Timings are useful for relative comparison (e.g. before and after adding an index) but not as absolute measures.
-
-5. Connect to the database:
-
-```bash
-psql -U postgres -d coffee_store
-```
-
-### Stop
-
-```bash
-docker compose down
-```
-
-To also remove the database volume:
-
-```bash
-docker compose down -v
+make up    # start
+make dev   # shell into container
+make down  # stop
+make wipe  # stop + remove volume
 ```

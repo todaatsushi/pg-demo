@@ -35,6 +35,9 @@ As an example, you might separate the users to match access patterns - a human t
 
 ## Users in this setup
 
+(DDL = Data Definition Language e.g. `ALTER TABLE`)
+(DML = Data Manipulation Language e.g. `UPDATE table SET`)
+
 | User | Owns | Access |
 |------|------|--------|
 | `application` | `application` schema + all its tables | Full DDL + DML on `application.*`. No access to `reporting`. |

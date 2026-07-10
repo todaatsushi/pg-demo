@@ -33,7 +33,7 @@ with psycopg.connect(dsn("reporting", "pg"), autocommit=True) as conn:
 print("  done.")
 
 print("Step 2/2: Dropping application.orders as application...")
-with psycopg.connect(dsn("application", "CRUD"), autocommit=True) as conn:
+with psycopg.connect(dsn("application", "pg"), autocommit=True) as conn:
     conn.execute("DROP TABLE IF EXISTS application.orders")
 print("  done.")
 
