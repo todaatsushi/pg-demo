@@ -34,10 +34,14 @@ GRANT pg_monitor TO performance_monitoring;
 ALTER SCHEMA application OWNER TO application;
 ALTER TABLE application.stores OWNER TO application;
 ALTER TABLE application.staff OWNER TO application;
+ALTER TABLE application.orders OWNER TO application;
 
 ALTER SCHEMA reporting OWNER TO reporting;
 ALTER MATERIALIZED VIEW reporting.staff_count_by_store_mat OWNER TO reporting;
 ALTER VIEW reporting.staff_count_by_store OWNER TO reporting;
+ALTER MATERIALIZED VIEW reporting.orders_by_day OWNER TO reporting;
+ALTER VIEW reporting.orders_by_store OWNER TO reporting;
+ALTER VIEW reporting.orders_by_staff OWNER TO reporting;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE application IN SCHEMA application
     GRANT SELECT ON TABLES TO read_app_data;
@@ -48,5 +52,10 @@ ALTER DEFAULT PRIVILEGES FOR ROLE application IN SCHEMA application
 
 ALTER DEFAULT PRIVILEGES FOR ROLE reporting IN SCHEMA reporting
     GRANT SELECT ON TABLES TO read_reporting;
+
+ALTER ROLE postgres SET search_path TO "$user", application, reporting, public;
+ALTER ROLE application SET search_path TO "$user", application, public;
+ALTER ROLE reporting SET search_path TO "$user", reporting, application, public;
+ALTER ROLE developer_ro SET search_path TO "$user", application, reporting, public;
 
 COMMIT;

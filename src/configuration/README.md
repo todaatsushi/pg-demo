@@ -75,13 +75,6 @@ psql -h localhost -U postgres -d grocery_store -f src/configuration/0003_organis
 psql -h localhost -U postgres -d grocery_store -f src/configuration/0004_users/run.sql
 ```
 
-5. Run the step 5 Python setup from `src/configuration/0005_app/src` (on the host):
-
-```bash
-uv sync
-uv run python scripts/setup.py
-```
-
 ### Connect to the database
 
 From `src/configuration/` - connects as `postgres` by default:
@@ -116,12 +109,9 @@ make wipe
 
 ## Reverting
 
-Each step has a `reverse.sql` (or `wipe_setup.py` for step 5). Run in reverse order:
+Each step has a `reverse.sql`. Run in reverse order:
 
 ```bash
-# on the host
-uv run python scripts/wipe_setup.py
-
 psql -h localhost -U postgres -d grocery_store -f src/configuration/0004_users/reverse.sql
 psql -h localhost -U postgres -d grocery_store -f src/configuration/0003_organisation/reverse.sql
 psql -h localhost -U postgres -d grocery_store -f src/configuration/0002_data/reverse.sql
