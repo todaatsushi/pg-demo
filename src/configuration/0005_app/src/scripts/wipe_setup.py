@@ -1,10 +1,10 @@
 """
-wipe_setup.py — reverse the 0005_app setup using the correct user per operation.
+wipe_setup.py - reverse the 0005_app setup using the correct user per operation.
 
 Each section connects as the role that owns the objects being dropped:
 
-  reporting   — drops the reporting views (owner of reporting schema)
-  application — drops application.orders (owner of application schema)
+  reporting   - drops the reporting views (owner of reporting schema)
+  application - drops application.orders (owner of application schema)
 
 Run:
     uv run python scripts/wipe_setup.py

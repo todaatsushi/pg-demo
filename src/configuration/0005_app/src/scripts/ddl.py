@@ -1,8 +1,8 @@
 """
-ddl.py — run DDL migrations as the `application` login user.
+ddl.py - run DDL migrations as the `application` login user.
 
 `application` owns the `application` schema and therefore has full DDL
-rights on it — CREATE, ALTER, DROP on any object within it. Running as
+rights on it - CREATE, ALTER, DROP on any object within it. Running as
 any other user (e.g. `developer_ro`) will fail with:
   ERROR: must be owner of schema application
 

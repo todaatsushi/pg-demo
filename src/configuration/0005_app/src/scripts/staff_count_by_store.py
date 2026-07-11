@@ -1,8 +1,8 @@
 """
-staff_count_by_store.py — query reporting.staff_count_by_store_mat and print
+staff_count_by_store.py - query reporting.staff_count_by_store_mat and print
 results to stdout.
 
-This is a materialised view — results reflect the last REFRESH, not live data.
+This is a materialised view - results reflect the last REFRESH, not live data.
 
 Run:
     uv run python scripts/staff_count_by_store.py

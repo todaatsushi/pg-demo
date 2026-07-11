@@ -1,5 +1,5 @@
 """
-long_running_transactions.py — query pg_stat_activity for transactions that
+long_running_transactions.py - query pg_stat_activity for transactions that
 have been running longer than a given threshold and print results to stdout.
 
 Connects as `performance_monitoring` by default, which has the `pg_monitor`

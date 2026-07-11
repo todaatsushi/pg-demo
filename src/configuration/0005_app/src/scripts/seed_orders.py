@@ -1,12 +1,12 @@
 """
-seed_orders.py — insert random orders concurrently to demo the application user
+seed_orders.py - insert random orders concurrently to demo the application user
 writing at scale.
 
 Each worker inserts total/workers orders over roughly `duration` seconds, with
 ±50% jitter per insert interval. Store and staff IDs are fetched once at start
 and sampled randomly per order.
 
-Connects as `application` by default — the owner of the `application` schema
+Connects as `application` by default - the owner of the `application` schema
 with full write access to `application.orders`.
 
 Run:
@@ -133,9 +133,9 @@ def main() -> None:
         ]
 
     if not store_ids:
-        raise SystemExit("No stores found — run 0002_data/run.sql first.")
+        raise SystemExit("No stores found - run 0002_data/run.sql first.")
     if not staff_ids:
-        raise SystemExit("No staff found — run 0002_data/run.sql first.")
+        raise SystemExit("No staff found - run 0002_data/run.sql first.")
 
     base_count, remainder = divmod(args.total, args.workers)
     counts = [base_count + (1 if i < remainder else 0) for i in range(args.workers)]

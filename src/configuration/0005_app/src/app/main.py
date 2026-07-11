@@ -1,5 +1,5 @@
 """
-main.py — FastAPI application entrypoint.
+main.py - FastAPI application entrypoint.
 
 Responsibilities:
   - Define the lifespan context that opens and closes the connection pool.

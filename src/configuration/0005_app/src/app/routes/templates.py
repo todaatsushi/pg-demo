@@ -1,5 +1,5 @@
 """
-routes/templates.py — HTML template routes.
+routes/templates.py - HTML template routes.
 
 These routes serve server-rendered HTML pages using Jinja2.
 They allow a user to view and add stores, staff members, and orders.
@@ -48,7 +48,7 @@ from app import db
 
 router = APIRouter()
 
-# Injected by main.py — see main.py for explanation.
+# Injected by main.py - see main.py for explanation.
 jinja: Jinja2Templates | None = None
 
 
@@ -94,7 +94,7 @@ def add_store(
 
     Both columns map directly to the stores table definition:
       name      text NOT NULL
-      location  text           (nullable — empty string stored as empty, not NULL)
+      location  text           (nullable - empty string stored as empty, not NULL)
 
     After insert we redirect to GET /stores with HTTP 303 so the browser
     does not resubmit the form on refresh.
@@ -146,7 +146,7 @@ def add_staff(
 ) -> RedirectResponse:
     """Insert a new staff member into application.staff.
 
-    store_id must reference an existing row in application.stores — this
+    store_id must reference an existing row in application.stores - this
     is enforced by the FK constraint on the table. If an invalid store_id
     is submitted the database will raise an IntegrityError, which FastAPI
     will surface as a 500. In production you would catch this explicitly.

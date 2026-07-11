@@ -1,4 +1,4 @@
--- Dependencies: none — run this before 0003_organisation/reverse.sql and 0002_data/reverse.sql
+-- Dependencies: none - run this before 0003_organisation/reverse.sql and 0002_data/reverse.sql
 
 BEGIN;
 

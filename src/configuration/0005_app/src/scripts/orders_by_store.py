@@ -1,7 +1,7 @@
 """
-orders_by_store.py — query reporting.orders_by_store and print results to stdout.
+orders_by_store.py - query reporting.orders_by_store and print results to stdout.
 
-This is a regular view — results are always current.
+This is a regular view - results are always current.
 Returns empty if the orders table has not been seeded.
 
 Run:
@@ -31,7 +31,7 @@ with conn:
     ).fetchall()
 
 if not rows:
-    print("No data — orders table is empty.")
+    print("No data - orders table is empty.")
 else:
     print(f"{'ID':<6} {'Store':<30} {'Orders':>8} {'Units':>8}")
     print("-" * 56)

@@ -1,7 +1,7 @@
 """
-orders_by_day.py — query reporting.orders_by_day and print results to stdout.
+orders_by_day.py - query reporting.orders_by_day and print results to stdout.
 
-This is a materialised view — results reflect the last REFRESH, not live data.
+This is a materialised view - results reflect the last REFRESH, not live data.
 Returns empty if the orders table has not been seeded.
 
 Run:
@@ -31,7 +31,7 @@ with conn:
     ).fetchall()
 
 if not rows:
-    print("No data — orders table is empty or view has not been refreshed.")
+    print("No data - orders table is empty or view has not been refreshed.")
 else:
     print(f"{'Day':<14} {'Orders':>8} {'Units':>8}")
     print("-" * 34)

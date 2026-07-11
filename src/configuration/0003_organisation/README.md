@@ -19,8 +19,8 @@ The `$user` is a variable that matches the user name being connected as in case 
 Schema privileges and object privileges are two separate layers & both are required to access an object.
 
 Schema-level privileges:
-- `USAGE ON SCHEMA <name>` — required to reference objects in the schema at all. Without it a role cannot even mention `schema.table`.
-- `CREATE ON SCHEMA <name>` — required to create new objects in the schema.
+- `USAGE ON SCHEMA <name>` - required to reference objects in the schema at all. Without it a role cannot even mention `schema.table`.
+- `CREATE ON SCHEMA <name>` - required to create new objects in the schema.
 
 Object-level privileges (`SELECT`, `INSERT`, etc.) are granted per-object and are independent of the schema. Reading a table requires both:
 

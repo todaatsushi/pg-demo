@@ -1,5 +1,5 @@
 """
-db.py — database connection pool.
+db.py - database connection pool.
 
 Uses psycopg 3 (the modern PostgreSQL driver) with its built-in
 ConnectionPool. A single module-level pool instance is shared across

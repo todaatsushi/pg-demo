@@ -1,11 +1,11 @@
 """
-setup.py — run the 0005_app setup using the correct database user per operation.
+setup.py - run the 0005_app setup using the correct database user per operation.
 
 Each section connects as the role that should own the resulting objects:
 
-  application — creates application.orders (owner of the application schema)
-  reporting   — creates the reporting views (owner of the reporting schema)
-  postgres    — transfers ownership and grants read_app_data access to orders
+  application - creates application.orders (owner of the application schema)
+  reporting   - creates the reporting views (owner of the reporting schema)
+  postgres    - transfers ownership and grants read_app_data access to orders
                 (superuser operations that cannot be done by the owning roles alone
                  since the grants target roles that don't own the objects yet)
 
