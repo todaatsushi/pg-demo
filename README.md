@@ -2,7 +2,7 @@
 
 A PostgreSQL demo environment running in Docker.
 
-## `src/queries`
+## WIP: `src/queries`
 
 Query performance and locking using a high-volume coffee store dataset (up to 5M orders).
 
