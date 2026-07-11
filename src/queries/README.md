@@ -83,16 +83,22 @@ make up
 make dev
 ```
 
-3. Run the schema migration:
+3. Create the database:
 
 ```bash
-psql -f /app/src/queries/migrations/0001_init/migrate.sql
+psql -f /app/src/queries/migrations/0000_database/migrate.sql
 ```
 
-4. Seed the data (may take a few minutes depending on volume):
+4. Run the schema migration:
 
 ```bash
-psql -f /app/src/queries/migrations/0002_seed/migrate.sql
+psql -d coffee_store -f /app/src/queries/migrations/0001_init/migrate.sql
+```
+
+5. Seed the data (may take a few minutes depending on volume):
+
+```bash
+psql -d coffee_store -f /app/src/queries/migrations/0002_seed/migrate.sql
 ```
 
 The seed script creates 5M orders across 95k customers by default. You can tweak these figures by editing the constants at the top of `src/queries/migrations/0002_seed/migrate.sql`:
