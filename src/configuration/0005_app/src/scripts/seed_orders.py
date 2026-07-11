@@ -3,8 +3,9 @@ seed_orders.py - insert random orders concurrently to demo the application user
 writing at scale.
 
 Each worker inserts total/workers orders over roughly `duration` seconds, with
-±50% jitter per insert interval. Store and staff IDs are fetched once at start
-and sampled randomly per order.
+±50% jitter per insert interval. Store and staff are picked randomly from the
+database on every insert, so new stores and staff added while the script is
+running will naturally appear in the order distribution.
 
 Connects as `application` by default - the owner of the `application` schema
 with full write access to `application.orders`.
@@ -50,8 +51,6 @@ def worker(
     pool: Any,
     count: int,
     delay: float,
-    store_ids: list[int],
-    staff_ids: list[int],
     counter: list[int],
     lock: threading.Lock,
     progress_every: int,
@@ -63,27 +62,37 @@ def worker(
     for _ in range(count):
         product = random.choice(PRODUCTS)
         units = random.randint(1, 5)
-        store_id = random.choice(store_ids)
-        staff_id = random.choice(staff_ids)
 
         if random_dt:
             ordered_at = datetime.now(timezone.utc) - timedelta(
                 seconds=random.randint(0, dt_range_days * 86400)
             )
             with pool.connection() as conn:
+                row = conn.execute(
+                    "SELECT s.id AS store_id, st.id AS staff_id "
+                    "FROM application.stores s "
+                    "JOIN application.staff st ON st.store_id = s.id "
+                    "ORDER BY random() LIMIT 1"
+                ).fetchone()
                 conn.execute(
                     "INSERT INTO application.orders "
                     "(product, units, store_id, staff_id, ordered_at) "
                     "VALUES (%s, %s, %s, %s, %s)",
-                    (product, units, store_id, staff_id, ordered_at),
+                    (product, units, row[0], row[1], ordered_at),
                 )
         else:
             with pool.connection() as conn:
+                row = conn.execute(
+                    "SELECT s.id AS store_id, st.id AS staff_id "
+                    "FROM application.stores s "
+                    "JOIN application.staff st ON st.store_id = s.id "
+                    "ORDER BY random() LIMIT 1"
+                ).fetchone()
                 conn.execute(
                     "INSERT INTO application.orders "
                     "(product, units, store_id, staff_id) "
                     "VALUES (%s, %s, %s, %s)",
-                    (product, units, store_id, staff_id),
+                    (product, units, row[0], row[1]),
                 )
 
         with lock:
@@ -123,18 +132,18 @@ def main() -> None:
 
     dsn = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
-    print("Fetching store and staff IDs...")
+    print("Verifying stores and staff exist...")
     with psycopg.connect(dsn) as conn:
-        store_ids = [
-            r[0] for r in conn.execute("SELECT id FROM application.stores").fetchall()
-        ]
-        staff_ids = [
-            r[0] for r in conn.execute("SELECT id FROM application.staff").fetchall()
-        ]
+        store_count = conn.execute(
+            "SELECT count(*) FROM application.stores"
+        ).fetchone()[0]
+        staff_count = conn.execute(
+            "SELECT count(*) FROM application.staff"
+        ).fetchone()[0]
 
-    if not store_ids:
+    if not store_count:
         raise SystemExit("No stores found - run 0002_data/run.sql first.")
-    if not staff_ids:
+    if not staff_count:
         raise SystemExit("No staff found - run 0002_data/run.sql first.")
 
     base_count, remainder = divmod(args.total, args.workers)
@@ -165,8 +174,6 @@ def main() -> None:
                     pool,
                     counts[i],
                     delay,
-                    store_ids,
-                    staff_ids,
                     counter,
                     lock,
                     args.progress_every,
