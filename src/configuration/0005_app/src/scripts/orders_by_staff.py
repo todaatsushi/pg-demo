@@ -22,13 +22,16 @@ args = parser.parse_args()
 
 DSN = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
+SQL = (
+    "SELECT staff_id, staff_name, order_count, total_units "
+    "FROM reporting.orders_by_staff "
+    "ORDER BY staff_id"
+)
+
+print(f"RUNNING SQL AS {args.user}:\n\n{SQL}\n")
 conn = psycopg.connect(DSN, row_factory=dict_row)
 with conn:
-    rows = conn.execute(
-        "SELECT staff_id, staff_name, order_count, total_units "
-        "FROM reporting.orders_by_staff "
-        "ORDER BY staff_id"
-    ).fetchall()
+    rows = conn.execute(SQL).fetchall()
 
 if not rows:
     print("No data - orders table is empty.")

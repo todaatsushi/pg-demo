@@ -25,6 +25,20 @@ args = parser.parse_args()
 
 DSN = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
+SQL = f"""
+SELECT
+    usename,
+    xact_start,
+    now() - xact_start AS duration,
+    query
+FROM pg_stat_activity
+WHERE state != 'idle'
+  AND xact_start IS NOT NULL
+  AND now() - xact_start > {args.min_seconds} * interval '1 second'
+ORDER BY duration DESC
+""".strip()
+
+print(f"RUNNING SQL AS {args.user}:\n\n{SQL}\n")
 conn = psycopg.connect(DSN, row_factory=dict_row)
 with conn:
     rows = conn.execute(

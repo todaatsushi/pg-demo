@@ -58,4 +58,18 @@ ALTER ROLE application SET search_path TO "$user", application, public;
 ALTER ROLE reporting SET search_path TO "$user", reporting, application, public;
 ALTER ROLE developer_ro SET search_path TO "$user", application, reporting, public;
 
+REVOKE SELECT ON pg_catalog.pg_stat_activity FROM PUBLIC;
+REVOKE SELECT ON pg_catalog.pg_stat_user_tables FROM PUBLIC;
+REVOKE SELECT ON pg_catalog.pg_statio_user_tables FROM PUBLIC;
+REVOKE SELECT ON pg_catalog.pg_stat_user_indexes FROM PUBLIC;
+REVOKE SELECT ON pg_catalog.pg_statio_user_indexes FROM PUBLIC;
+REVOKE SELECT ON pg_catalog.pg_stat_database FROM PUBLIC;
+
+GRANT SELECT ON pg_catalog.pg_stat_activity TO pg_monitor;
+GRANT SELECT ON pg_catalog.pg_stat_user_tables TO pg_monitor;
+GRANT SELECT ON pg_catalog.pg_statio_user_tables TO pg_monitor;
+GRANT SELECT ON pg_catalog.pg_stat_user_indexes TO pg_monitor;
+GRANT SELECT ON pg_catalog.pg_statio_user_indexes TO pg_monitor;
+GRANT SELECT ON pg_catalog.pg_stat_database TO pg_monitor;
+
 COMMIT;

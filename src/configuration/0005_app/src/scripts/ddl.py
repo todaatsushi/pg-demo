@@ -46,6 +46,7 @@ label = "reverse" if args.reverse else "forward"
 
 DSN = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
+print(f"RUNNING SQL AS {args.user}:\n\n{sql.strip()}\n")
 with psycopg.connect(DSN, autocommit=True) as conn:
     conn.execute(sql)
 

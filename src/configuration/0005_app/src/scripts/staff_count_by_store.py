@@ -22,13 +22,16 @@ args = parser.parse_args()
 
 DSN = f"postgresql://{args.user}:{args.password}@localhost:5432/grocery_store"
 
+SQL = (
+    "SELECT store_id, store_name, staff_count "
+    "FROM reporting.staff_count_by_store_mat "
+    "ORDER BY store_id"
+)
+
+print(f"RUNNING SQL AS {args.user}:\n\n{SQL}\n")
 conn = psycopg.connect(DSN, row_factory=dict_row)
 with conn:
-    rows = conn.execute(
-        "SELECT store_id, store_name, staff_count "
-        "FROM reporting.staff_count_by_store_mat "
-        "ORDER BY store_id"
-    ).fetchall()
+    rows = conn.execute(SQL).fetchall()
 
 print(f"{'ID':<6} {'Store':<30} {'Staff'}")
 print("-" * 45)

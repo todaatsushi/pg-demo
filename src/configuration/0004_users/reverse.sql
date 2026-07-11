@@ -2,6 +2,13 @@
 
 BEGIN;
 
+GRANT SELECT ON pg_catalog.pg_stat_activity TO PUBLIC;
+GRANT SELECT ON pg_catalog.pg_stat_user_tables TO PUBLIC;
+GRANT SELECT ON pg_catalog.pg_statio_user_tables TO PUBLIC;
+GRANT SELECT ON pg_catalog.pg_stat_user_indexes TO PUBLIC;
+GRANT SELECT ON pg_catalog.pg_statio_user_indexes TO PUBLIC;
+GRANT SELECT ON pg_catalog.pg_stat_database TO PUBLIC;
+
 GRANT CONNECT ON DATABASE grocery_store TO PUBLIC;
 
 REASSIGN OWNED BY application TO postgres;
