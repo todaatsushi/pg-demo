@@ -14,27 +14,3 @@ It's quite common to refer to tables without the schema name in it. So to find t
 
 The `$user` is a variable that matches the user name being connected as in case the schema and user are named the same. It's skipped if it doesn't exist.
 
-## Granting on schemas
-
-Schema privileges and object privileges are two separate layers & both are required to access an object.
-
-Schema-level privileges:
-- `USAGE ON SCHEMA <name>` - required to reference objects in the schema at all. Without it a role cannot even mention `schema.table`.
-- `CREATE ON SCHEMA <name>` - required to create new objects in the schema.
-
-Object-level privileges (`SELECT`, `INSERT`, etc.) are granted per-object and are independent of the schema. Reading a table requires both:
-
-```sql
-GRANT USAGE ON SCHEMA application TO some_role;
-GRANT SELECT ON application.stores TO some_role;
-```
-
-`USAGE` on a schema does **not** cascade down to grant `SELECT` on its tables & there is no schema-level equivalent of `SELECT` that bubbles down to all objects. The closest bulk mechanism is:
-
-```sql
-GRANT SELECT ON ALL TABLES IN SCHEMA application TO some_role;
-```
-
-but this only covers tables that exist at the time the statement runs. See `0004_users/README.md` for how `ALTER DEFAULT PRIVILEGES` addresses future objects.
-
-Schemas are separate objects to the objects within the schema. Grants on the schema apply to the literal schema itself and grants to the objects must be made individually.
