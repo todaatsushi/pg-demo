@@ -29,8 +29,4 @@ DELETE FROM stores WHERE name = 'The Shambles';
 These datastructures are counters that generate unique incrementing values, used for auto-incrementing primary keys.
 
 
-## Views
 
-As the name suggests, a view is a specific modelling of table data that acts as an interface into it.
-
-Materialised views are views that are stored at a point in time (ie. refreshed only when explicitly called).

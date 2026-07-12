@@ -35,8 +35,8 @@ erDiagram
 | Step | Directory | Concept |
 |------|-----------|---------|
 | 1 | `0001_databases` | Creating a logical database |
-| 2 | `0002_data` | Tables, sequences, views, materialised views |
-| 3 | `0003_organisation` | Schemas - grouping objects, search path, grants |
+| 2 | `0002_data` | Tables, sequences |
+| 3 | `0003_organisation` | Schemas - grouping objects, search path, grants, views |
 | 4 | `0004_users` | Roles, login users, ownership, default privileges |
 | 5 | `0005_app` | FastAPI app and role-specific scripts |
 

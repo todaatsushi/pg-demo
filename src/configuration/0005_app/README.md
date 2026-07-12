@@ -34,7 +34,7 @@ controls which parts of the schema each role can see. `read_reporting` grants
 `USAGE` on `reporting` only - a role without that grant cannot see `reporting`
 objects at all.
 
-### Views and materialised views (`0005_app`)
+### Views and materialised views (`0003_organisation`)
 
 The reporting scripts demonstrate the difference between the two view types:
 
