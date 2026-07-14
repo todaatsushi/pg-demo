@@ -15,8 +15,7 @@ GET  /stores      List all stores + form to add a new one.
 POST /stores      Insert a new store; redirect back to GET /stores.
 GET  /staff       List all staff (joined with store name) + form to add.
 POST /staff       Insert a new staff member; redirect back to GET /staff.
-GET  /orders      List all orders + form to add a new one.
-POST /orders      Insert a new order; redirect back to GET /orders.
+GET  /orders      List all orders with optional filters (store, staff, date range).
 
 Database access
 ---------------
@@ -40,7 +39,7 @@ a browser refresh does not resubmit the form.
 
 from typing import Any
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -166,17 +165,53 @@ def add_staff(
 
 
 @router.get("/orders", response_class=HTMLResponse)
-def orders_page(request: Request) -> Any:
+def orders_page(
+    request: Request,
+    store_id: int | None = Query(default=None),
+    staff_id: int | None = Query(default=None),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+) -> Any:
+    """Render the orders page with optional filters.
+
+    Query parameters:
+      store_id   - filter by store (integer FK)
+      staff_id   - filter by staff member (integer FK)
+      date_from  - inclusive lower bound on ordered_at (YYYY-MM-DD)
+      date_to    - inclusive upper bound on ordered_at (YYYY-MM-DD)
+    """
+    conditions: list[str] = []
+    params: list[Any] = []
+
+    if store_id is not None:
+        conditions.append("o.store_id = %s")
+        params.append(store_id)
+    if staff_id is not None:
+        conditions.append("o.staff_id = %s")
+        params.append(staff_id)
+    if date_from:
+        conditions.append("o.ordered_at >= %s")
+        params.append(date_from)
+    if date_to:
+        conditions.append("o.ordered_at <= %s")
+        params.append(date_to)
+
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
     with db.pool.connection() as conn:
         with conn.cursor(row_factory=db.dict_row) as cur:
-            cur.execute("""
+            cur.execute(
+                f"""
                 SELECT o.id, o.product, o.units, o.ordered_at,
                        s.name AS store_name, st.name AS staff_name
                 FROM application.orders o
                 JOIN application.stores s ON s.id = o.store_id
                 JOIN application.staff st ON st.id = o.staff_id
+                {where}
                 ORDER BY o.ordered_at DESC
-            """)
+                """,
+                params,
+            )
             orders = cur.fetchall()
 
             cur.execute("SELECT id, name FROM application.stores ORDER BY id")
@@ -185,24 +220,22 @@ def orders_page(request: Request) -> Any:
             cur.execute("SELECT id, name FROM application.staff ORDER BY id")
             staff = cur.fetchall()
 
+    filters = {
+        "store_id": store_id,
+        "staff_id": staff_id,
+        "date_from": date_from,
+        "date_to": date_to,
+    }
+
     assert jinja is not None
     return jinja.TemplateResponse(
-        request, "orders.html", {"orders": orders, "stores": stores, "staff": staff}
+        request,
+        "orders.html",
+        {
+            "orders": orders,
+            "stores": stores,
+            "staff": staff,
+            "total": len(orders),
+            "filters": filters,
+        },
     )
-
-
-@router.post("/orders")
-def add_order(
-    product: str = Form(...),
-    units: int = Form(...),
-    store_id: int = Form(...),
-    staff_id: int = Form(...),
-) -> RedirectResponse:
-    with db.pool.connection() as conn:
-        conn.execute(
-            "INSERT INTO application.orders (product, units, store_id, staff_id) "
-            "VALUES (%s, %s, %s, %s)",
-            (product, units, store_id, staff_id),
-        )
-
-    return RedirectResponse(url="/orders", status_code=303)
